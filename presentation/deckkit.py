@@ -136,9 +136,28 @@ def set_bullet(p, char="•", color=GOLD, indent=0.20, size_pct=100):
         pPr.append(el)
 
 
+def set_autonum(p, indent=0.24, style="arabicDbPeriod", color=GOLD, size_pct=100):
+    """Real PowerPoint auto-numbering (Arabic-Indic digits), RTL-safe."""
+    from pptx.oxml import parse_xml
+    from pptx.oxml.ns import nsdecls
+    pPr = _ppr(p)
+    pPr.set("marL", str(int(indent * 914400)))
+    pPr.set("indent", str(int(-indent * 914400)))
+    for tag in ("a:buNone", "a:buChar", "a:buAutoNum", "a:buClr", "a:buSzPct", "a:buFont"):
+        el = pPr.find(qn(tag))
+        if el is not None:
+            pPr.remove(el)
+    xml = ('<a:buClr %s><a:srgbClr val="%s"/></a:buClr>' % (nsdecls("a"), color))
+    xml += ('<a:buSzPct %s val="%d"/>' % (nsdecls("a"), size_pct * 1000))
+    xml += ('<a:buAutoNum %s type="%s" startAt="1"/>' % (nsdecls("a"), style))
+    wrapper = parse_xml('<a:root %s>%s</a:root>' % (nsdecls("a"), xml))
+    for el in list(wrapper):
+        pPr.append(el)
+
+
 def write(tf, lines, size=14, color=BODY, bold=False, align=PP_ALIGN.RIGHT,
           space_after=6, line_spacing=1.32, font=FONT, spacing=None,
-          first=True, bullet=None, bullet_color=GOLD, space_before=0):
+          first=True, bullet=None, bullet_color=GOLD, space_before=0, numbered=False):
     """lines: str or list of (text, dict(overrides)) or str."""
     if isinstance(lines, str):
         lines = [lines]
@@ -154,7 +173,9 @@ def write(tf, lines, size=14, color=BODY, bold=False, align=PP_ALIGN.RIGHT,
             p.space_before = Pt(sb)
         p.space_after = Pt(opts.get("space_after", space_after))
         p.line_spacing = opts.get("line_spacing", line_spacing)
-        if bullet:
+        if numbered:
+            set_autonum(p, color=opts.get("bullet_color", bullet_color))
+        elif bullet:
             set_bullet(p, char=bullet, color=opts.get("bullet_color", bullet_color))
         r = p.add_run()
         r.text = item
@@ -282,9 +303,9 @@ def watermark_circles(slide, x, y, d, color=GOLD, alpha=0.10, rings=3, weight=0.
 def chrome(slide, idx, total, kicker=None, footer_txt="تدريب المراقبين الجويين في التعامل مع أطقم المسيرات"):
     # footer hairline
     hline(slide, M, 7.02, CW, color="1B3049", weight=0.75)
-    # left: page number
+    # left: page number (Arabic-Indic digits, zero padded)
     tb = textbox(slide, M, 7.10, 1.2, 0.3)
-    write(tb.text_frame, [(f"{idx:02d}", {"color": GOLD, "size": 10, "bold": True})],
+    write(tb.text_frame, [(ar_num(idx, 2), {"color": GOLD, "size": 10, "bold": True})],
           align=PP_ALIGN.LEFT, first=True)
     # right: footer text
     tb = textbox(slide, SW - M - 6.4, 7.10, 6.4, 0.3)

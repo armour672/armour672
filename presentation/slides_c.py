@@ -482,8 +482,8 @@ def s28(prs, n, total):
         hline(s, x + 0.24, y + 0.58, cw - 0.52, color="2A4058", weight=0.75)
         tb = textbox(s, x + 0.24, y + 0.72, cw - 0.52, 3.5)
         for k, it in enumerate(items):
-            write(tb.text_frame, [(f"{k+1}.  " + it, {"color": BODY, "size": 9.2})],
-                  first=(k == 0), space_after=9, line_spacing=1.32)
+            write(tb.text_frame, [(it, {"color": BODY, "size": 9.2})],
+                  first=(k == 0), space_after=9, line_spacing=1.32, numbered=True)
     return s
 
 
