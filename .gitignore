@@ -1,0 +1,5 @@
+# generated previews / build caches
+presentation/preview/
+presentation/preview-hi/
+presentation/__pycache__/
+__pycache__/
