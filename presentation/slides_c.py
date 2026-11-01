@@ -36,15 +36,15 @@ def s19(prs, n, total):
     ]
     gap = 0.2
     cw = (CW - 4 * gap) / 5
-    yy = y + 1.34
+    yy = y + 1.10
     for i, (t, d) in enumerate(pr):
         x = SW - M - cw - i * (cw + gap)
-        card(s, x, yy, cw, 2.06, fill=CARD_2, line="1D3149", accent=GOLD, accent_w=0.045)
+        card(s, x, yy, cw, 2.42, fill=CARD_2, line="1D3149", accent=GOLD, accent_w=0.045)
         numbered_badge(s, x + cw - 0.56, yy + 0.22, 0.34, ar_num(i + 1), size=9)
-        tb = textbox(s, x + 0.2, yy + 0.74, cw - 0.42, 0.58)
+        tb = textbox(s, x + 0.2, yy + 0.86, cw - 0.42, 0.62)
         write(tb.text_frame, [(t, {"color": INK, "size": 11, "bold": True})],
               first=True, space_after=0, line_spacing=1.2)
-        tb = textbox(s, x + 0.2, yy + 1.34, cw - 0.42, 0.66)
+        tb = textbox(s, x + 0.2, yy + 1.54, cw - 0.42, 0.74)
         write(tb.text_frame, [(d, {"color": MUTED, "size": 8.8})], first=True,
               space_after=0, line_spacing=1.3)
 
@@ -494,7 +494,7 @@ def s29(prs, n, total):
     pic = picture_cover(s, A + "cover.jpg", 0, 0, SW, SH)
     veil = rect(s, 0, 0, SW, SH, fill="050C16", shape=MSO_SHAPE.RECTANGLE)
     set_alpha(veil, 0.74)
-    frame = rect(s, 0.42, 0.40, SW - 0.84, SH - 0.80, fill=None, line="7C6A3E", line_w=0.75)
+    frame = rect(s, 0.42, 0.62, SW - 0.84, 6.32, fill=None, line="7C6A3E", line_w=0.75)
     set_line_alpha(frame, 0.5)
 
     tb = textbox(s, SW - M - 9.0, 2.28, 9.0, 0.34)
@@ -521,8 +521,5 @@ def s29(prs, n, total):
     tb = textbox(s, SW - M - 10.0, 6.62, 10.0, 0.34)
     write(tb.text_frame, ["   ·   ".join(names)], size=9, color=MUTED, first=True, space_after=0)
 
-    chip = rect(s, M, 6.48, 0.92, 0.28, fill=None, line=GOLD, line_w=0.9, radius=0.35)
-    chip.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
-    write(chip.text_frame, [("محظور", {"color": GOLD_SOFT, "size": 8.5, "bold": True,
-                                       "align": PP_ALIGN.CENTER})], first=True, space_after=0)
+    chrome(s, n, total)
     return s

@@ -61,10 +61,11 @@ def line_style(shp):
     return None, 0, 0
 
 
-def draw_wrapped(draw, text, font, box, color, align, line_h):
+def draw_wrapped(draw, text, font, box, color, align, line_h, ltr=False,
+                 underline=False):
     """Simple greedy wrap; box = (x0,y0,x1,y1) in px."""
     x0, y0, x1, y1 = box
-    shaped = get_display(arabic_reshaper.reshape(text))
+    shaped = text if ltr else get_display(arabic_reshaper.reshape(text))
     words = shaped.split(" ")
     maxw = x1 - x0
     lines, cur = [], ""
@@ -82,6 +83,9 @@ def draw_wrapped(draw, text, font, box, color, align, line_h):
         tw = draw.textlength(ln, font=font)
         x = x1 - tw if align == "r" else (x0 + (maxw - tw) / 2 if align == "c" else x0)
         draw.text((x, y), ln, font=font, fill=color)
+        if underline and tw > 0:
+            uy = y + line_h * 0.80
+            draw.line([(x, uy), (x + tw, uy)], fill=color, width=max(1, int(font.size / 14)))
         y += line_h
     return y
 
@@ -239,8 +243,10 @@ def render():
                 # skip pure latin-number debug? keep all
                 ls = p.line_spacing if isinstance(p.line_spacing, float) else 1.2
                 lh = size * ls * SCALE / 72
+                ltr_para = (p._p.pPr is not None and p._p.pPr.get("rtl") == "0")
+                und = any(bool(r.font.underline) for r in p.runs)
                 cy = draw_wrapped(draw, text, fnt(size, bold), (x0, cy, x1, y + h),
-                                  "#" + c, align, lh)
+                                  "#" + c, align, lh, ltr=ltr_para, underline=und)
                 if p.space_after:
                     cy += p.space_after.pt * SCALE / 72
         p = os.path.join(OUT, f"slide-{idx:02d}.png")

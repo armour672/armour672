@@ -20,7 +20,7 @@ CARD       = "112338"
 CARD_2     = "0E1D30"
 LINE       = "20374F"
 
-FONT = "Tahoma"
+FONT = "Arial"
 SW, SH = 13.333, 7.5
 M = 0.85          # side margin
 CW = SW - 2 * M   # content width
@@ -47,11 +47,13 @@ def _rpr(run):
 
 
 def style_run(run, size=14, bold=False, color=BODY, font=FONT, italic=False,
-              spacing=None, alpha=None):
+              spacing=None, alpha=None, underline=False):
     f = run.font
     f.size = Pt(size)
     f.bold = bold
     f.italic = italic
+    if underline:
+        f.underline = True
     f.name = font
     if alpha is None:
         f.color.rgb = rgb(color)
@@ -179,9 +181,13 @@ def write(tf, lines, size=14, color=BODY, bold=False, align=PP_ALIGN.RIGHT,
             set_bullet(p, char=bullet, color=opts.get("bullet_color", bullet_color))
         r = p.add_run()
         r.text = item
+        _sz = opts.get("size", size)
+        if _sz < 9:            # Arial runs small for Arabic: keep captions legible
+            opts["size"] = 9
         style_run(r, size=opts.get("size", size), bold=opts.get("bold", bold),
                   color=opts.get("color", color), font=opts.get("font", font),
-                  spacing=opts.get("spacing", spacing))
+                  spacing=opts.get("spacing", spacing),
+                  underline=opts.get("underline", False))
         out.append(p)
     return out
 
@@ -300,23 +306,32 @@ def watermark_circles(slide, x, y, d, color=GOLD, alpha=0.10, rings=3, weight=0.
         shp.shadow.inherit = False
 
 
-def chrome(slide, idx, total, kicker=None, footer_txt="تدريب المراقبين الجويين في التعامل مع أطقم المسيرات"):
-    # footer hairline
+CLASSIFIED = "محظور"
+
+
+def chrome(slide, idx, total, footer_txt=None):
+    """Centred classification band: -٤- / محظور (top) and محظور (bottom)."""
+    # thin rule framing the footer
     hline(slide, M, 7.02, CW, color="1B3049", weight=0.75)
-    # left: page number (Arabic-Indic digits, zero padded)
-    tb = textbox(slide, M, 7.10, 1.2, 0.3)
-    write(tb.text_frame, [(ar_num(idx, 2), {"color": GOLD, "size": 10, "bold": True})],
-          align=PP_ALIGN.LEFT, first=True)
-    # right: footer text
-    tb = textbox(slide, SW - M - 6.4, 7.10, 6.4, 0.3)
-    write(tb.text_frame, [(footer_txt, {"color": MUTED, "size": 8.5})], first=True)
-    # classification chip top-left
-    chip = rect(slide, M, 0.42, 0.78, 0.245, fill=None, line=GOLD, line_w=0.75,
-                radius=0.35)
-    tf = chip.text_frame
-    tf.vertical_anchor = MSO_ANCHOR.MIDDLE
-    write(tf, [("محظور", {"color": GOLD_SOFT, "size": 7.5, "bold": True,
-                          "align": PP_ALIGN.CENTER})], first=True, space_after=0)
+
+    # top centre: page number between two dashes (LTR paragraph so the two
+    # dashes cannot swap sides under the bidi algorithm, e.g. -٠٤-)
+    tb = textbox(slide, SW / 2 - 1.6, 0.10, 3.2, 0.22)
+    pnum = write(tb.text_frame, [("-" + ar_num(idx, 0) + "-",
+                                  {"color": GOLD, "size": 9, "bold": True,
+                                   "align": PP_ALIGN.CENTER})],
+                 first=True, space_after=0)[0]
+    pnum._p.get_or_add_pPr().set("rtl", "0")
+    # top centre: classification, underlined
+    tb = textbox(slide, SW / 2 - 1.6, 0.31, 3.2, 0.24)
+    write(tb.text_frame, [(CLASSIFIED, {"color": GOLD_SOFT, "size": 9.5, "bold": True,
+                                        "align": PP_ALIGN.CENTER, "spacing": 2.0,
+                                        "underline": True})], first=True, space_after=0)
+    # bottom centre: classification, underlined
+    tb = textbox(slide, SW / 2 - 1.6, 7.13, 3.2, 0.24)
+    write(tb.text_frame, [(CLASSIFIED, {"color": GOLD_SOFT, "size": 9.5, "bold": True,
+                                        "align": PP_ALIGN.CENTER, "spacing": 2.0,
+                                        "underline": True})], first=True, space_after=0)
 
 
 def heading(slide, title, kicker=None, sub=None, y=0.55):

@@ -21,7 +21,7 @@ def s01(prs, n, total):
     veil2 = rect(s, 0, 0, SW, 4.1, fill="040A12", shape=MSO_SHAPE.RECTANGLE)
     set_alpha(veil2, 0.35)
     # gold frame
-    frame = rect(s, 0.42, 0.40, SW - 0.84, SH - 0.80, fill=None, line="7C6A3E",
+    frame = rect(s, 0.42, 0.62, SW - 0.84, 6.32, fill=None, line="7C6A3E",
                  line_w=0.75)
     set_line_alpha(frame, 0.55)
 
@@ -63,10 +63,7 @@ def s01(prs, n, total):
     write(tb.text_frame, ["   ·   ".join(names)], size=10, color=BODY,
           first=True, space_after=0)
 
-    chip = rect(s, M, 6.48, 0.92, 0.28, fill=None, line=GOLD, line_w=0.9, radius=0.35)
-    chip.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
-    write(chip.text_frame, [("محظور", {"color": GOLD_SOFT, "size": 8.5, "bold": True,
-                                       "align": PP_ALIGN.CENTER})], first=True, space_after=0)
+    chrome(s, n, total)
     return s
 
 
